@@ -1,6 +1,8 @@
 import turtle
 count =5
 
+    
+
 turtle.penup()
 turtle.goto(-250,250)
 turtle.pendown()
@@ -35,4 +37,3 @@ while(count<5):
 
 
 turtle.exitonclick()
-    
