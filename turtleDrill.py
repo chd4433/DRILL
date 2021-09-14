@@ -17,12 +17,12 @@ def down():
     player.forward(50)
 def reset():
     player.reset()
-
-screen.onkeypress(left, "a")
-screen.onkeypress(right, "d")
-screen.onkeypress(up, "w")
-screen.onkeypress(down, "s")
-screen.onkeypress(reset, "Escape")
+player.shape('turtle')
+screen.onkey(left, "a")
+screen.onkey(right, "d")
+screen.onkey(up, "w")
+screen.onkey(down, "s")
+screen.onkey(reset, "Escape")
 screen.listen() 
 screen.mainloop() 
 
