@@ -33,6 +33,8 @@ def Go_Charater():
     charaterY += PlusY
 
 
+
+
 def handle_events():
     global running
     events = get_events()
