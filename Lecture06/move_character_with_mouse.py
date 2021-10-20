@@ -16,7 +16,7 @@ def handle_events():
             running = False
 
 
-open_canvas(KPU_WIDTH,KPU_HEIGHT)
+open_canvas(KPU_WIDTH, KPU_HEIGHT)
 
 # fill here
 kpu_ground = load_image('KPU_GROUND.png')
