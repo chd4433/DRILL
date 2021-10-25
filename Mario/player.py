@@ -30,7 +30,7 @@ class Mario:
                         self.image = load_image('walk\walk2.png')
                     elif self.dir == -1:
                         self.image = load_image('walk\walkL2.png')
-                if (self.x > 1280 // 2):
+                if (self.x >= 1280 // 2):
                     self.rx += 15 * self.dir
                 else:
                     self.x += 15 * self.dir
@@ -297,4 +297,4 @@ while running:
     player.draw()
     update_canvas()
 
-    delay(0.05)
+    delay(0.03)
