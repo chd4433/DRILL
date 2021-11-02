@@ -3,3 +3,4 @@ from pico2d import *
 
 
 def move_obj(obj):
+    pass
