@@ -8,32 +8,26 @@ import game_world
 
 from boy import Boy
 from grass import Grass
-from ball import Ball, BigBall
-from bird import bird
+from ball import Ball
+from brick import Brick
 
 name = "MainState"
 
 boy = None
 grass = None
-# bird1 = None
-# bird2 = None
-# bird3 = None
-# bird4 = None
-# bird5 = None
-
 balls = []
-big_balls = []
-
-
+brick = None
 
 def collide(a, b):
-    left_a , bottom_a, right_a, top_a = a.get_bb()
+    # fill here
+    left_a, bottom_a, right_a, top_a = a.get_bb()
     left_b, bottom_b, right_b, top_b = b.get_bb()
 
     if left_a > right_b: return False
     if right_a < left_b: return False
     if top_a < bottom_b: return False
     if bottom_a > top_b: return False
+
     return True
 
 
@@ -48,33 +42,9 @@ def enter():
     grass = Grass()
     game_world.add_object(grass, 0)
 
-    # global bird1
-    # bird1 = bird()
-    # game_world.add_object(bird1, 2)
-
-    global balls
-    balls = [Ball() for i in range(10)] + [BigBall() for i in range(10)]
-    game_world.add_objects(balls, 1)
-
-    # global bird2
-    # bird2 = bird()
-    # game_world.add_object(bird2, 3)
-    #
-    # global bird3
-    # bird3 = bird()
-    # game_world.add_object(bird3, 4)
-    #
-    # global bird4
-    # bird4 = bird()
-    # game_world.add_object(bird4, 5)
-    #
-    # global bird5
-    # bird5 = bird()
-    # game_world.add_object(bird5, 6)
-
-    # fill here for balls
-
-
+    global bricks
+    bricks = [Brick(300+300*i, 100+50*i) for i in range(5)]
+    game_world.add_objects(bricks, 1)
 
 
 
@@ -103,11 +73,19 @@ def handle_events():
 def update():
     for game_object in game_world.all_objects():
         game_object.update()
-    for ball in balls:
-        if collide(boy, ball):
+
+    for ball in balls.copy():
+        if collide(ball, grass):
+            ball.stop()
+        if collide(ball, boy):
             balls.remove(ball)
             game_world.remove_object(ball)
-            # print("COLLISON")
+    for brick in bricks.copy():
+        if collide(boy, brick):
+            boy.collide_brick_height(brick.get_brick_height())
+            boy.collide_brick_width(brick.get_brick_width())
+            boy.collide_brick_getspeed(brick.get_brick_speed())
+
 
 
 

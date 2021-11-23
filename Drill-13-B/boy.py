@@ -51,6 +51,11 @@ class IdleState:
         pass
 
     def do(boy):
+        boy.x += boy.idle_speed * game_framework.frame_time
+        # if boy.x > boy.right_clamp:
+        #     boy.x = boy.right_clamp
+        # if boy.x < boy.left_clamp:
+        #     boy.x = boy.left_clamp
         boy.frame = (boy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
         boy.timer -= 1
         if boy.timer == 0:
@@ -84,7 +89,11 @@ class RunState:
         #boy.frame = (boy.frame + 1) % 8
         boy.frame = (boy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
         boy.x += boy.velocity * game_framework.frame_time
-        boy.x = clamp(25, boy.x, 1600 - 25)
+        if boy.x > boy.right_clamp:
+            boy.x = boy.right_clamp
+        if boy.x < boy.left_clamp:
+            boy.x = boy.left_clamp
+        boy.x = clamp(boy.left_clamp, boy.x, boy.right_clamp)
 
     def draw(boy):
         if boy.dir == 1:
@@ -102,6 +111,7 @@ class SleepState:
         pass
 
     def do(boy):
+        boy.x += boy.idle_speed * game_framework.frame_time
         boy.frame = (boy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
 
     def draw(boy):
@@ -124,7 +134,7 @@ next_state_table = {
 class Boy:
 
     def __init__(self):
-        self.x, self.y = 1600 // 2, 90
+        self.x, self.y = 50, 90
         # Boy is only once created, so instance image loading is fine
         self.image = load_image('animation_sheet.png')
         self.font = load_font('ENCR10B.TTF', 16)
@@ -134,20 +144,24 @@ class Boy:
         self.event_que = []
         self.cur_state = IdleState
         self.cur_state.enter(self, None)
+        self.left_clamp, self.right_clamp = 25, 1600 - 25
+        self.idle_speed = 0
 
     def get_bb(self):
-        return self.x - 50, self.y - 50, self.x + 50, self.y + 50
+        # fill here
+        return self.x - 30, self.y - 30, self.x + 30, self.y + 50
+
 
 
     def fire_ball(self):
-        ball = Ball(self.x, self.y, self.dir * RUN_SPEED_PPS * 10)
-        game_world.add_object(ball, 1)
+        pass
 
 
     def add_event(self, event):
         self.event_que.insert(0, event)
 
     def update(self):
+
         self.cur_state.do(self)
         if len(self.event_que) > 0:
             event = self.event_que.pop()
@@ -155,15 +169,23 @@ class Boy:
             self.cur_state = next_state_table[self.cur_state][event]
             self.cur_state.enter(self, event)
 
+
     def draw(self):
         self.cur_state.draw(self)
         self.font.draw(self.x - 60, self.y + 50, '(Time: %3.2f)' % get_time(), (255, 255, 0))
         draw_rectangle(*self.get_bb())
-        #fill here
-
+        debug_print('Velocity :' + str(self.velocity) + '  Dir:' + str(self.dir) + ' Frame Time:' + str(game_framework.frame_time))
 
     def handle_event(self, event):
         if (event.type, event.key) in key_event_table:
             key_event = key_event_table[(event.type, event.key)]
             self.add_event(key_event)
 
+    def collide_brick_height(self, height):
+        self.y = height + 50
+
+    def collide_brick_width(self, width):
+        self.left_clamp, self.right_clamp = width - 90, width + 90
+
+    def collide_brick_getspeed(self, speed):
+        self.idle_speed = speed

@@ -4,7 +4,7 @@ import game_world
 import random
 
 PIXEL_PER_METER = (10.0 / 0.3)  # 10 pixel 30 cm
-BIRD_SPEED_KMPH = 0.3  # Km / Hour
+BIRD_SPEED_KMPH = 20  # Km / Hour
 BIRD_SPEED_MPM = (BIRD_SPEED_KMPH * 1000.0 / 60.0)
 BIRD_SPEED_MPS = (BIRD_SPEED_MPM / 60.0)
 BIRD_SPEED_PPS = (BIRD_SPEED_MPS * PIXEL_PER_METER)
@@ -33,9 +33,9 @@ class Fly:
         elif bird.x <= 100 and bird.dir == 0:
             bird.dir = 1
         if bird.dir == 1:
-            bird.velocity += BIRD_SPEED_PPS
+            bird.velocity = BIRD_SPEED_PPS
         elif bird.dir == 0:
-            bird.velocity -= BIRD_SPEED_PPS
+            bird.velocity = -BIRD_SPEED_PPS
         bird.x += bird.velocity * game_framework.frame_time
         bird.frame = (bird.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 14
 
