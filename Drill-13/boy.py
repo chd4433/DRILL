@@ -3,8 +3,6 @@ from pico2d import *
 from ball import Ball
 
 import game_world
-import collision
-import server
 
 # Boy Run Speed
 PIXEL_PER_METER = (10.0 / 0.3)  # 10 pixel 30 cm
@@ -53,11 +51,6 @@ class IdleState:
         pass
 
     def do(boy):
-        boy.x += boy.idle_speed * game_framework.frame_time
-        # if boy.x > boy.right_clamp:
-        #     boy.x = boy.right_clamp
-        # if boy.x < boy.left_clamp:
-        #     boy.x = boy.left_clamp
         boy.frame = (boy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
         boy.timer -= 1
         if boy.timer == 0:
@@ -90,12 +83,8 @@ class RunState:
     def do(boy):
         #boy.frame = (boy.frame + 1) % 8
         boy.frame = (boy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
-        boy.x += (boy.velocity + boy.idle_speed) * game_framework.frame_time
-        if boy.x > boy.right_clamp:
-            boy.x = boy.right_clamp
-        if boy.x < boy.left_clamp:
-            boy.x = boy.left_clamp
-        boy.x = clamp(boy.left_clamp, boy.x, boy.right_clamp)
+        boy.x += boy.velocity * game_framework.frame_time
+        boy.x = clamp(25, boy.x, 1600 - 25)
 
     def draw(boy):
         if boy.dir == 1:
@@ -113,7 +102,6 @@ class SleepState:
         pass
 
     def do(boy):
-        boy.x += boy.idle_speed * game_framework.frame_time
         boy.frame = (boy.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % 8
 
     def draw(boy):
@@ -136,7 +124,7 @@ next_state_table = {
 class Boy:
 
     def __init__(self):
-        self.x, self.y = 50, 90
+        self.x, self.y = 1600 // 2, 90
         # Boy is only once created, so instance image loading is fine
         self.image = load_image('animation_sheet.png')
         self.font = load_font('ENCR10B.TTF', 16)
@@ -146,18 +134,15 @@ class Boy:
         self.event_que = []
         self.cur_state = IdleState
         self.cur_state.enter(self, None)
-        self.left_clamp, self.right_clamp = 25, 1600 - 25
-        self.idle_speed = 0
-        self.parent = None
 
     def get_bb(self):
         # fill here
-        return self.x - 30, self.y - 30, self.x + 30, self.y + 50
-
+        return self.x - 50, self.y - 50, self.x + 50, self.y + 50
 
 
     def fire_ball(self):
-        pass
+        ball = Ball(self.x, self.y, self.dir * RUN_SPEED_PPS * 10)
+        game_world.add_object(ball, 1)
 
 
     def add_event(self, event):
@@ -172,14 +157,6 @@ class Boy:
             self.cur_state = next_state_table[self.cur_state][event]
             self.cur_state.enter(self, event)
 
-        if self.parent:
-            self.x += self.parent.speed * game_framework.frame_time
-            self.x = clamp(self.parent.x - 90, self.x, self.parent.x + 90)
-        for brick in server.bricks:
-            if collision.collide(self, brick):
-                self.set_parent(brick)
-                break
-
 
     def draw(self):
         self.cur_state.draw(self)
@@ -192,15 +169,3 @@ class Boy:
             key_event = key_event_table[(event.type, event.key)]
             self.add_event(key_event)
 
-    def collide_brick_height(self, height):
-        self.y = height + 50
-
-    def collide_brick_width(self, width):
-        self.left_clamp, self.right_clamp = width - 90, width + 90
-
-    def collide_brick_getspeed(self, speed):
-        self.idle_speed = speed
-
-    def set_parent(self, brick):
-        self.parent = brick
-        self.x, self.y = brick.x + brick.BOY_X0, brick.y + brick.BOY_Y0
